@@ -1,0 +1,57 @@
+{
+  "entities": {
+    "UserPrivateProfile": {
+      "title": "UserPrivateProfile",
+      "description": "Private user account record isolating PII such as email from public directory queries.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "minLength": 3, "maxLength": 254 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "authProvider": { "type": "string", "enum": ["google", "firebase_email", "email"] },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "displayName", "authProvider", "role", "createdAt", "updatedAt"]
+    },
+    "UserPublicProfile": {
+      "title": "UserPublicProfile",
+      "description": "Public student profile visible in Study Chat and note attribution without exposing email PII.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "displayName": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "avatar": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "role": { "type": "string", "enum": ["student", "admin"] },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "avatar", "role", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted admin allowlist document mapped by Firebase UID.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "minLength": 3, "maxLength": 254 },
+        "grantedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "grantedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserPrivateProfile" },
+      "description": "Owner-only and admin-accessible private profile storing user email and auth provider."
+    },
+    "/users_public/{userId}": {
+      "schema": { "$ref": "#/entities/UserPublicProfile" },
+      "description": "Split public directory profile without PII for Study Chat and creator cards."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Admin role verification documents."
+    }
+  }
+}
